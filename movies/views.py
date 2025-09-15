@@ -2,6 +2,15 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import Movie, Review
 from django.contrib.auth.decorators import login_required
 
+def top_comments(request):
+    # order by most recent date
+    top_reviews = Review.objects.select_related("user", "movie").order_by("-date")[:10]
+
+    context = {
+        "top_reviews": top_reviews
+    }
+    return render(request, "movies/top_comments.html", context)
+
 def index(request):
     search_term = request.GET.get('search')
     if search_term:
@@ -17,12 +26,15 @@ def index(request):
 def show(request, id):
     movie =  Movie.objects.get(id=id)
     reviews = Review.objects.filter(movie=movie)
+    top_reviews = Review.objects.select_related("user", "movie").filter(movie=movie).order_by("-date")[:5]
     template_data = {}
     template_data['title'] =  movie.name
     template_data['movie'] = movie
     template_data['reviews'] = reviews
     return render(request, 'movies/show.html',
-                  {'template_data': template_data})
+                  {'template_data': template_data,
+                   'top_reviews': top_reviews
+                   })
 
 @login_required
 def create_review(request, id):
