@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Movie, Review
+from .models import Movie, Review, MovieRequest
 from django.contrib.auth.decorators import login_required
 
 def top_comments(request):
@@ -77,3 +77,30 @@ def delete_review(request, id, review_id):
 
 
 # Create your views here.
+
+@login_required
+def movie_requests(request):
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        description = request.POST.get('description', '').strip()
+        if name and description:
+            MovieRequest.objects.create(
+                name=name,
+                description=description,
+                user=request.user
+            )
+        return redirect('movies.requests')
+
+    user_requests = MovieRequest.objects.filter(user=request.user).order_by('-created_at')
+    template_data = {
+        'title': 'My Movie Requests',
+        'requests': user_requests,
+    }
+    return render(request, 'movies/requests.html', {'template_data': template_data})
+
+
+@login_required
+def delete_movie_request(request, request_id):
+    req = get_object_or_404(MovieRequest, id=request_id, user=request.user)
+    req.delete()
+    return redirect('movies.requests')
