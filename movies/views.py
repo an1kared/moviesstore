@@ -34,9 +34,7 @@ def show(request, id):
     template_data['movie'] = movie
     template_data['reviews'] = reviews
     return render(request, 'movies/show.html',
-                  {'template_data': template_data,
-                   'top_reviews': top_reviews
-                   })
+                  {'template_data': template_data,})
 
 @login_required
 def create_review(request, id):
