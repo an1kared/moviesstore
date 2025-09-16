@@ -80,7 +80,21 @@
           </div>
         </div>
         {% endif %}
+        <h2 class="mt-5">Top Comments (Most Recent)</h2>
         <hr />
+        <ul class="list-group">
+          {% for review in top_reviews %}
+          <li class="list-group-item py-3">
+            <p class="mb-1">"{{ review.comment }}"</p>
+            <small class="text-muted">
+              – {{ review.user.username }} on <b>{{ review.movie.name }}</b>, {{ review.date }}
+            </small>
+          </li>
+          {% empty %}
+          <li class="list-group-item">No comments yet!</li>
+          {% endfor %}
+        </ul>
+
       </div>
 
       <div class="col-md-6 mx-auto mb-3 text-center">

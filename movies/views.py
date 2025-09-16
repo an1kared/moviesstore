@@ -26,12 +26,17 @@ def index(request):
 def show(request, id):
     movie =  Movie.objects.get(id=id)
     reviews = Review.objects.filter(movie=movie)
+    top_reviews = Review.objects.select_related("user", "movie").order_by("-date")[:5]
+
+
     template_data = {}
     template_data['title'] =  movie.name
     template_data['movie'] = movie
     template_data['reviews'] = reviews
     return render(request, 'movies/show.html',
-                  {'template_data': template_data})
+                  {'template_data': template_data,
+                   'top_reviews': top_reviews
+                   })
 
 @login_required
 def create_review(request, id):
