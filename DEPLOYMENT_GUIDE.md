@@ -37,22 +37,27 @@ Make sure to upload the entire `petitions/` folder with all its contents:
 
 ---
 
-## Step 2: Upload to PythonAnywhere
+## Step 2: Clone from Git Repository (Recommended)
 
-### Method 1: Using PythonAnywhere File Manager
+### 🎯 Your Repository is Ready!
+Your code is now available at: **https://github.com/an1kared/moviesstore.git**
+
+### Clone the Repository
+Open a **Bash console** in PythonAnywhere and run:
+```bash
+cd /home/yourusername/
+git clone https://github.com/an1kared/moviesstore.git
+```
+
+This will create a `moviesstore` folder with all your code including the petition system!
+
+### Alternative: Using PythonAnywhere File Manager
+If you prefer to upload manually:
 1. Go to PythonAnywhere dashboard
 2. Click "Files" tab
 3. Navigate to `/home/yourusername/`
 4. Upload your `moviesstore` folder
 5. Extract if it's a zip file
-
-### Method 2: Using Git (Recommended)
-If your code is in a Git repository:
-```bash
-cd /home/yourusername/
-git clone https://github.com/yourusername/your-repo.git
-mv your-repo moviesstore
-```
 
 ---
 
