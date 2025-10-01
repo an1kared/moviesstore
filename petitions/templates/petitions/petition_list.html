@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="text-white">Movie Petitions 📢</h1>
+                <a href="{% url 'petitions:create_petition' %}" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Start a New Petition
+                </a>
+            </div>
+            
+            <p class="text-light mb-4">Help us decide which movies to add to our catalog! Vote on petitions or create your own.</p>
+
+            {% for petition in petitions %}
+                <div class="card mb-4 bg-dark text-white border-secondary">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h3 class="card-title text-success">
+                                    {{ petition.title }} 
+                                    {% if petition.release_year %}
+                                        <span class="text-muted">({{ petition.release_year }})</span>
+                                    {% endif %}
+                                </h3>
+                                <p class="card-text">{{ petition.description|linebreaksbr }}</p>
+                                <small class="text-muted">
+                                    <i class="fas fa-user"></i> Posted by {{ petition.posted_by.username }} 
+                                    <i class="fas fa-calendar ms-2"></i> {{ petition.created_at|date:"M d, Y" }}
+                                </small>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <div class="mb-3">
+                                    <h4 class="text-warning">
+                                        <i class="fas fa-thumbs-up"></i> {{ petition.votes }}
+                                    </h4>
+                                    <small class="text-muted">votes</small>
+                                </div>
+                                
+                                {% if user.is_authenticated %}
+                                    {% if petition.user_has_voted %}
+                                        <button type="button" class="btn btn-success btn-lg" disabled>
+                                            <i class="fas fa-check"></i> Voted
+                                        </button>
+                                        <small class="d-block text-muted mt-1">You've already voted!</small>
+                                    {% else %}
+                                        <form action="{% url 'petitions:vote_petition' petition.id %}" method="post">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-primary btn-lg">
+                                                <i class="fas fa-vote-yea"></i> Vote
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                {% else %}
+                                    <a href="{% url 'accounts.login' %}" class="btn btn-outline-light">
+                                        <i class="fas fa-sign-in-alt"></i> Login to Vote
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="text-center py-5">
+                    <div class="card bg-dark text-white border-secondary">
+                        <div class="card-body">
+                            <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                            <h3>No petitions yet!</h3>
+                            <p class="text-muted">Be the first to start a petition for a movie you'd like to see in our catalog.</p>
+                            <a href="{% url 'petitions:create_petition' %}" class="btn btn-success btn-lg">
+                                <i class="fas fa-plus"></i> Create First Petition
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
