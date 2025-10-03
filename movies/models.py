@@ -32,3 +32,25 @@ class MovieRequest(models.Model):
 
     def __str__(self):
         return f"{self.name} by {self.user.username}"
+
+class Petition(models.Model):
+    id = models.AutoField(primary_key=True)
+    movie_name = models.CharField(max_length=255)
+    description = models.TextField()
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_petitions')
+    created_at = models.DateTimeField(auto_now_add=True)
+    voters = models.ManyToManyField(User, through='PetitionVote', related_name='voted_petitions')
+
+    def __str__(self):
+        return f"Petition: {self.movie_name} by {self.created_by.username}"
+    
+    def get_vote_count(self):
+        return self.petitionvote_set.count()
+
+class PetitionVote(models.Model):
+    petition = models.ForeignKey(Petition, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    voted_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('petition', 'user')

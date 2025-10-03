@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Movie, Review, MovieRequest
+from .models import Movie, Review, MovieRequest, Petition, PetitionVote
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 
 def top_comments(request):
     # order by most recent date
@@ -104,3 +105,52 @@ def delete_movie_request(request, request_id):
     req = get_object_or_404(MovieRequest, id=request_id, user=request.user)
     req.delete()
     return redirect('movies.requests')
+
+# Petition views
+@login_required
+def petitions(request):
+    if request.method == 'POST':
+        movie_name = request.POST.get('movie_name', '').strip()
+        description = request.POST.get('description', '').strip()
+        if movie_name and description:
+            Petition.objects.create(
+                movie_name=movie_name,
+                description=description,
+                created_by=request.user
+            )
+            messages.success(request, 'Petition created successfully!')
+        else:
+            messages.error(request, 'Please fill in all fields.')
+        return redirect('movies.petitions')
+
+    # Get all petitions with vote counts
+    petitions_list = Petition.objects.all().order_by('-created_at')
+    for petition in petitions_list:
+        petition.vote_count = petition.get_vote_count()
+        petition.user_has_voted = request.user in petition.voters.all()
+
+    template_data = {
+        'title': 'Movie Petitions',
+        'petitions': petitions_list,
+    }
+    return render(request, 'movies/petitions.html', {'template_data': template_data})
+
+@login_required
+def vote_petition(request, petition_id):
+    petition = get_object_or_404(Petition, id=petition_id)
+    
+    # Check if user already voted
+    if request.user in petition.voters.all():
+        messages.warning(request, 'You have already voted on this petition.')
+    else:
+        PetitionVote.objects.create(petition=petition, user=request.user)
+        messages.success(request, f'You voted for "{petition.movie_name}"!')
+    
+    return redirect('movies.petitions')
+
+@login_required
+def delete_petition(request, petition_id):
+    petition = get_object_or_404(Petition, id=petition_id, created_by=request.user)
+    petition.delete()
+    messages.success(request, 'Petition deleted successfully.')
+    return redirect('movies.petitions')

@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="container my-4">
+  <div class="row">
+    <div class="col-12 col-lg-6">
+      <h3 class="mb-3">Create a Movie Petition</h3>
+      <p class="text-muted mb-3">Start a petition to request a movie be added to our catalog. Other users can vote on your petition!</p>
+      <form method="post" action="{% url 'movies.petitions' %}">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="movie_name" class="form-label">Movie Name</label>
+          <input type="text" class="form-control" id="movie_name" name="movie_name" required>
+        </div>
+        <div class="mb-3">
+          <label for="description" class="form-label">Why should we add this movie?</label>
+          <textarea class="form-control" id="description" name="description" rows="4" required placeholder="Tell us why this movie should be added to our catalog..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Create Petition</button>
+      </form>
+    </div>
+    <div class="col-12 col-lg-6">
+      <h3 class="mb-3">Active Petitions</h3>
+      {% if template_data.petitions %}
+      <div class="row">
+        {% for petition in template_data.petitions %}
+        <div class="col-12 mb-3">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">{{ petition.movie_name }}</h5>
+              <p class="card-text">{{ petition.description }}</p>
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <small class="text-muted">
+                    Created by {{ petition.created_by.username }} on {{ petition.created_at|date:'M d, Y' }}
+                  </small>
+                  <br>
+                  <span class="badge bg-primary">{{ petition.vote_count }} vote{{ petition.vote_count|pluralize }}</span>
+                </div>
+                <div>
+                  {% if petition.user_has_voted %}
+                    <span class="badge bg-success">You voted!</span>
+                  {% else %}
+                    <a href="{% url 'movies.vote_petition' petition.id %}" class="btn btn-sm btn-outline-primary">
+                      <i class="fas fa-thumbs-up"></i> Vote
+                    </a>
+                  {% endif %}
+                  {% if petition.created_by == user %}
+                    <form method="post" action="{% url 'movies.delete_petition' petition.id %}" class="d-inline">
+                      {% csrf_token %}
+                      <button class="btn btn-sm btn-outline-danger ms-1" onclick="return confirm('Delete this petition?');">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </form>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="alert alert-secondary">
+        <i class="fas fa-info-circle"></i> No petitions yet. Be the first to create one!
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}
